@@ -43,6 +43,7 @@ class Representation:
     controls: tuple[str, ...] = ()
     test_ids: tuple[str, ...] = ()
     derived_data_id: str = ""
+    falsification_test: str = ""
 
 
 @dataclass(frozen=True)
@@ -62,6 +63,20 @@ class RepresentationTest:
     result: str = ""
 
 
+@dataclass(frozen=True)
+class LearningRecord:
+    """A learner's judgement is part of a portable understanding artifact."""
+
+    goal: str
+    representation_id: str
+    reaction: str = ""
+    explain_back: str = ""
+    confidence: float | None = None
+    challenge: str = ""
+    gaps: tuple[str, ...] = ()
+    recommended_representation_id: str = ""
+
+
 @dataclass
 class RepresentationNotebook:
     """The shareable object; diagrams and chat transcripts are projections of it."""
@@ -75,6 +90,7 @@ class RepresentationNotebook:
     derived_data: dict[str, DerivedData] = field(default_factory=dict)
     tests: dict[str, RepresentationTest] = field(default_factory=dict)
     claims: tuple[str, ...] = ()
+    learning_ledger: tuple[LearningRecord, ...] = ()
     version: str = "0.1"
 
     def validate(self) -> None:
@@ -109,6 +125,11 @@ class RepresentationNotebook:
                 raise ValueError(f"{derived.id}: unknown representation")
             if not derived.columns or not derived.rows:
                 raise ValueError(f"{derived.id}: columns and rows are required")
+        for record in self.learning_ledger:
+            if not record.goal.strip() or record.representation_id not in self.representations:
+                raise ValueError("learning records require a goal and known representation")
+            if record.recommended_representation_id and record.recommended_representation_id not in self.representations:
+                raise ValueError("learning record references an unknown recommendation")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

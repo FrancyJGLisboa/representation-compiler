@@ -19,10 +19,12 @@ from .learning import assess_explanation, make_challenge, start_candidates
 from .catalog import import_icrs_catalog
 from .sky_explorer import write_sky_explorer
 from .fits_catalog import import_icrs_fits_catalog
+from .universal import import_codebase_material, import_table_material, import_text_material
+from .notebook_explorer import write_notebook_explorer
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Search evidence-backed operational representations")
+    parser = argparse.ArgumentParser(description="Build evidence-backed understanding notebooks from any material")
     parser.add_argument("question", nargs="?", help="Question to answer with a representation")
     parser.add_argument("--top", type=int, default=3)
     parser.add_argument("--csv", type=Path)
@@ -49,10 +51,31 @@ def main() -> None:
     parser.add_argument("--fits-dec-column", help="Explicit FITS latitude/Dec column with a degree-convertible unit")
     parser.add_argument("--fits-hdu", type=int, default=1, help="FITS binary-table HDU index")
     parser.add_argument("--fits-frame", help="Explicit coordinate frame when RADESYS is absent: ICRS, FK5, FK4, or GALACTIC")
+    parser.add_argument("--import-text", type=Path, help="Import notes, a transcript, or extracted document text into an understanding notebook")
+    parser.add_argument("--import-table", type=Path, help="Import a CSV table into an understanding notebook")
+    parser.add_argument("--import-codebase", type=Path, help="Import a source directory into an architecture understanding notebook")
+    parser.add_argument("--material-question", help="What the learner wants to understand for a generic material import")
+    parser.add_argument("--notebook-explorer", type=Path, help="Notebook JSON to render as a generic interactive understanding explorer")
     args = parser.parse_args()
     model = project_alpha()
     if args.serve:
         serve(str(args.database), args.port)
+        return
+    generic_imports = (args.import_text, args.import_table, args.import_codebase)
+    if sum(item is not None for item in generic_imports) > 1:
+        parser.error("choose only one of --import-text, --import-table, or --import-codebase")
+    if any(generic_imports):
+        if not args.notebook_output or not args.material_question:
+            parser.error("generic material imports require --material-question and --notebook-output")
+        if args.import_text:
+            imported = import_text_material(args.import_text, args.material_question, args.catalog_source_uri)
+        elif args.import_table:
+            imported = import_table_material(args.import_table, args.material_question, args.catalog_source_uri)
+        else:
+            imported = import_codebase_material(args.import_codebase, args.material_question, args.catalog_source_uri)
+        output = imported.notebook.write_json(args.notebook_output)
+        explorer = write_notebook_explorer(imported.notebook.to_dict(), args.explorer_output) if args.explorer_output else None
+        print(f"Indexed {imported.item_count} source items\nNotebook: {output}" + (f"\nExplorer: {explorer}" if explorer else ""))
         return
     if args.import_star_catalog:
         if not args.notebook_output:
@@ -75,6 +98,13 @@ def main() -> None:
             parser.error("--sky-explorer requires --explorer-output")
         notebook = json.loads(args.sky_explorer.read_text(encoding="utf-8"))
         output = write_sky_explorer(notebook, args.explorer_output)
+        print(f"Explorer: {output}")
+        return
+    if args.notebook_explorer:
+        if not args.explorer_output:
+            parser.error("--notebook-explorer requires --explorer-output")
+        notebook = json.loads(args.notebook_explorer.read_text(encoding="utf-8"))
+        output = write_notebook_explorer(notebook, args.explorer_output)
         print(f"Explorer: {output}")
         return
     if args.ingest:

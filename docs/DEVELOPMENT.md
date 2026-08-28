@@ -92,6 +92,27 @@ Then import a FITS binary table whose selected coordinate columns declare units 
 
 The importer accepts `ICRS`, `FK5`, `FK4`, and `GALACTIC` via `RADESYS` or `--fits-frame`. It transforms every supported input into ICRS before deriving Cartesian unit vectors, then records the source frame/equinox and ICRS output frame. For Galactic catalogs, pass the longitude and latitude columns through `--fits-ra-column` and `--fits-dec-column` (for example, `L` and `B`). Unsupported or unspecified frames are rejected rather than guessed.
 
-## Supported local sources
+## Supported local sources and general understanding notebooks
+
+Create portable notebooks from three general material types:
+
+```bash
+# Notes, papers already extracted to text, and video transcripts
+python3 -m representation_compiler.cli --import-text material.txt \
+  --material-question "What is the central mechanism?" \
+  --notebook-output material.notebook.json --explorer-output material.html
+
+# CSV measurements, tables, and exported datasets
+python3 -m representation_compiler.cli --import-table measurements.csv \
+  --material-question "Which variables matter?" \
+  --notebook-output measurements.notebook.json
+
+# A local source directory
+python3 -m representation_compiler.cli --import-codebase ./project \
+  --material-question "How does a request move through this system?" \
+  --notebook-output project.notebook.json
+```
+
+Each notebook indexes its original material, stores five structurally distinct candidate representations, records what each candidate preserves/discards/makes easier, and includes a falsification test. The standalone explorer lets a learner select a view, complete explain-back, and download the notebook with an updated `learning_ledger`.
 
 `representation_compiler.connectors.local_file()` reads `.txt`, `.md`, `.csv`, `.json`, `.eml`, and selectable-text PDF files. Credentialed Slack, Notion, Google Drive, and Jira adapters obtain their tokens from environment variables; do not put credentials in source control.

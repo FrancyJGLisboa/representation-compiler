@@ -61,4 +61,31 @@ It is not a promise that an AI will discover new science every time. A skill giv
 
 The Python companion stores sources, evidence, review history, representation tournaments, and learning sessions locally. It is optional for ordinary use.
 
+## Build a portable notebook from your own material
+
+The companion now supports material beyond astronomy. It never needs an LLM API key: use your existing agent subscription for the source-specific representation-discovery skill, and use these adapters to preserve the material, candidate structures, learner feedback, and resulting model.
+
+```bash
+# A transcript, paper extracted to text, notes, or a copied article
+python3 -m representation_compiler.cli \
+  --import-text lecture.txt \
+  --material-question "Understand how feedback loops stabilise this system" \
+  --notebook-output lecture.notebook.json \
+  --explorer-output lecture.explorer.html
+
+# A measurement table
+python3 -m representation_compiler.cli \
+  --import-table experiment.csv \
+  --material-question "What controls the outcome?" \
+  --notebook-output experiment.notebook.json
+
+# A code repository or source directory
+python3 -m representation_compiler.cli \
+  --import-codebase ./my-project \
+  --material-question "How does this system process a request?" \
+  --notebook-output architecture.notebook.json
+```
+
+Open the generated HTML explorer. It presents five structurally different starting views—concept map, mechanism map, timeline, state machine, and concept matrix. Select what clicked, explain it back, then download the updated notebook with your learning ledger included.
+
 See [development and local companion setup](docs/DEVELOPMENT.md).

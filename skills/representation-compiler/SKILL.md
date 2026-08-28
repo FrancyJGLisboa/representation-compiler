@@ -25,6 +25,26 @@ Material:
 
 If material is pasted, treat the pasted content as the source. Do not make the user create JSON, choose a representation, name an entity, or run the local engine manually.
 
+For a portable command packet that works from any agentic terminal, the user can run:
+
+```bash
+repr learn "transcript.txt" --goal "Explain the video's core mechanism and its failure cases"
+```
+
+They paste the resulting packet into their agent. This command does not call an LLM or require an API key; it makes the required reasoning protocol explicit.
+
+## Required representation-discovery protocol
+
+This is mandatory whenever the user asks for a better way to understand, explain, or reason about material. Do not reduce the task to a summary or select a diagram before this protocol is complete.
+
+1. Treat the current representation as arbitrary. Identify primitive objects, explicit and implicit relationships, hidden symmetries, expensive operations, and distinctions that may be irrelevant.
+2. Produce structurally different candidates: change objects, coordinates, invariances/equivalence classes, relations, latent state, or scale. Do not make cosmetic diagram variants.
+3. For each candidate, record source-to-representation mapping, recoverability, preserved/discarded information, explicit invariants, what becomes easier/harder, a downstream task, and a falsifiable test.
+4. Run a tournament on understanding utility: explain-back quality, transfer, visible uncertainty, cognitive load, and evidence traceability. Apply predictive power, compression, invariance, causal interpretability, robustness, and computational efficiency when measurable.
+5. Keep a representation ledger. For every finalist, include its strongest counterexample/failure regime and what newly becomes visible. Continue with another transformation if the winning representation still leaves the key relationship obscure.
+
+Search deliberately for quotients, coordinate systems, sufficient representations, generative representations, and transformations that turn hard operations into easier ones: nonlinear to linear, global to local, temporal to geometric, high-dimensional to sparse, relational to graphical, or repeated computation to lookup.
+
 ## Workflow
 
 1. Ask what the user needs to understand, explain, track, or decide if it is not evident. Do not ask the user to select a diagram type.

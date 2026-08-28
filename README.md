@@ -9,6 +9,19 @@ python3 -m pytest
 python3 -m representation_compiler.cli "Where do teams disagree?" --csv output/disagreements.csv
 ```
 
+## Invoke from any agentic terminal
+
+Install the project locally, then create a portable task packet:
+
+```bash
+python3 -m pip install -e .
+repr learn "transcript.txt" --goal "Explain the video's core mechanism and its failure cases"
+```
+
+Paste the output into Codex CLI, Claude Code, or Copilot CLI. The packet requires representation discovery: candidate families, source-to-representation mappings, invariants, falsifiable tests, and a tournament based on understanding utility. It does not require an API key and it does not itself call an LLM.
+
+`SKILL.md` supplies the same mandatory protocol to an agent that supports local skills. A skill is instruction-level enforcement, not a hard runtime guarantee: the durable checks are the stored candidate ledger, evidence review, and falsification records.
+
 The command searches the built-in Project Alpha fixture, prints the highest-scoring candidate views with score rationales, and writes the winner as an Excel-compatible CSV.
 
 ## What works now

@@ -65,6 +65,28 @@ python3 -m representation_compiler.cli \
   --explorer-output catalog.sky.html
 ```
 
+## Import a FITS catalog now
+
+Install the optional astronomy dependency once:
+
+```bash
+python3 -m pip install -e '.[astronomy]'
+```
+
+FITS import requires the exact RA/Dec column names. Those columns must carry units Astropy can convert to degrees. The binary-table header must declare `RADESYS = ICRS`, or you must state `--fits-frame ICRS`; other frames are rejected until a coordinate transformation is implemented.
+
+```bash
+python3 -m representation_compiler.cli \
+  --import-fits-catalog catalog.fits \
+  --fits-ra-column RA \
+  --fits-dec-column DEC \
+  --fits-hdu 1 \
+  --notebook-output catalog.notebook.json \
+  --explorer-output catalog.sky.html
+```
+
+The notebook records the FITS checksum, HDU, original column names and units, `RADESYS`, `EQUINOX`, coordinate frame, derived vectors, and invariant result.
+
 ## Next build slice
 
-Add FITS support and a richer explorer with angular-separation measurement and uncertainty overlays after this contract is proven with real catalogs.
+Add non-ICRS frame transformations and FITS uncertainty-column mappings after this contract is proven with real catalogs.

@@ -71,6 +71,27 @@ python3 -m representation_compiler.cli \
 
 Pass `--catalog-source-uri` when the catalog has a stable public source URL. The JSON stores provenance, a checksum, named derived Cartesian vectors, the coordinate transform, representation trade-offs, and the executable invariant result. `catalog.sky.html` is a self-contained explorer that can be shared alongside the JSON.
 
+## FITS catalog notebook
+
+Install optional FITS support in a virtual environment:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[astronomy]'
+```
+
+Then import an ICRS binary table whose selected coordinate columns declare units convertible to degrees:
+
+```bash
+.venv/bin/python -m representation_compiler.cli \
+  --import-fits-catalog catalog.fits \
+  --fits-ra-column RA \
+  --fits-dec-column DEC \
+  --notebook-output catalog.notebook.json
+```
+
+The importer records FITS `RADESYS`, `EQUINOX`, HDU, column units, checksum, and source URI. It currently accepts ICRS only; it rejects an unspecified or different coordinate frame rather than guessing a conversion.
+
 ## Supported local sources
 
 `representation_compiler.connectors.local_file()` reads `.txt`, `.md`, `.csv`, `.json`, `.eml`, and selectable-text PDF files. Credentialed Slack, Notion, Google Drive, and Jira adapters obtain their tokens from environment variables; do not put credentials in source control.

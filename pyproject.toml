@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 
 [project.optional-dependencies]
 openai = ["openai>=1"]
+astronomy = ["astropy>=6"]
 
 [project.scripts]
 representation-compiler = "representation_compiler.cli:main"
@@ -13,3 +14,6 @@ repr = "representation_compiler.command:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["representation_compiler*"]

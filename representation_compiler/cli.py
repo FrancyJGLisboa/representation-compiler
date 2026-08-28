@@ -18,6 +18,7 @@ from .connectors import local_file
 from .learning import assess_explanation, make_challenge, start_candidates
 from .catalog import import_icrs_catalog
 from .sky_explorer import write_sky_explorer
+from .fits_catalog import import_icrs_fits_catalog
 
 
 def main() -> None:
@@ -43,6 +44,11 @@ def main() -> None:
     parser.add_argument("--catalog-source-uri", help="Stable URI to store in the portable catalog notebook")
     parser.add_argument("--sky-explorer", type=Path, help="Notebook JSON containing derived vectors to render as an interactive sky explorer")
     parser.add_argument("--explorer-output", type=Path, help="Destination HTML file for an interactive sky explorer")
+    parser.add_argument("--import-fits-catalog", type=Path, help="Import an ICRS FITS binary table into a portable astronomy notebook")
+    parser.add_argument("--fits-ra-column", help="Explicit FITS right-ascension column with a degree-convertible unit")
+    parser.add_argument("--fits-dec-column", help="Explicit FITS declination column with a degree-convertible unit")
+    parser.add_argument("--fits-hdu", type=int, default=1, help="FITS binary-table HDU index")
+    parser.add_argument("--fits-frame", help="Explicit coordinate frame when RADESYS is absent; currently ICRS only")
     args = parser.parse_args()
     model = project_alpha()
     if args.serve:
@@ -55,6 +61,14 @@ def main() -> None:
         output = imported.notebook.write_json(args.notebook_output)
         explorer = write_sky_explorer(imported.notebook.to_dict(), args.explorer_output) if args.explorer_output else None
         print(f"Imported {imported.row_count} catalog rows\nMaximum unit-norm error: {imported.max_unit_norm_error:.3g}\nNotebook: {output}" + (f"\nExplorer: {explorer}" if explorer else ""))
+        return
+    if args.import_fits_catalog:
+        if not args.notebook_output or not args.fits_ra_column or not args.fits_dec_column:
+            parser.error("--import-fits-catalog requires --notebook-output, --fits-ra-column, and --fits-dec-column")
+        imported = import_icrs_fits_catalog(args.import_fits_catalog, ra_column=args.fits_ra_column, dec_column=args.fits_dec_column, hdu=args.fits_hdu, frame=args.fits_frame, source_uri=args.catalog_source_uri)
+        output = imported.notebook.write_json(args.notebook_output)
+        explorer = write_sky_explorer(imported.notebook.to_dict(), args.explorer_output) if args.explorer_output else None
+        print(f"Imported {imported.row_count} FITS rows\nMaximum unit-norm error: {imported.max_unit_norm_error:.3g}\nNotebook: {output}" + (f"\nExplorer: {explorer}" if explorer else ""))
         return
     if args.sky_explorer:
         if not args.explorer_output:

@@ -1,0 +1,20 @@
+# Python build and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local history and generated views
+data/
+output/
+
+# Private working material and session archive
+artifacts/
+conversation.txt
+README.txt
+
+# Local environment files
+.env
+.venv/
+venv/

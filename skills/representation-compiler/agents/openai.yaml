@@ -1,0 +1,4 @@
+interface:
+  display_name: "Representation Compiler"
+  short_description: "Turn messy sources into evidence-linked visual explanations"
+  default_prompt: "Help me reason about these sources and generate the best visual representations."

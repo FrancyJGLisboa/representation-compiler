@@ -51,7 +51,7 @@ def main() -> None:
     parser.add_argument("--fits-dec-column", help="Explicit FITS latitude/Dec column with a degree-convertible unit")
     parser.add_argument("--fits-hdu", type=int, default=1, help="FITS binary-table HDU index")
     parser.add_argument("--fits-frame", help="Explicit coordinate frame when RADESYS is absent: ICRS, FK5, FK4, or GALACTIC")
-    parser.add_argument("--import-text", type=Path, help="Import notes, a transcript, or extracted document text into an understanding notebook")
+    parser.add_argument("--import-text", type=Path, help="Import notes, a transcript, or extracted document text; use - for standard input")
     parser.add_argument("--import-table", type=Path, help="Import a CSV table into an understanding notebook")
     parser.add_argument("--import-codebase", type=Path, help="Import a source directory into an architecture understanding notebook")
     parser.add_argument("--material-question", help="What the learner wants to understand for a generic material import")

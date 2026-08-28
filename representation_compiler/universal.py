@@ -5,6 +5,7 @@ import ast
 import csv
 import hashlib
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -28,12 +29,17 @@ _CANDIDATES = (
 
 
 def import_text_material(path: str | Path, question: str, source_uri: str | None = None) -> MaterialImport:
-    source = Path(path)
-    text = source.read_text(encoding="utf-8")
+    if str(path) == "-":
+        source, text = Path("pasted-material.txt"), sys.stdin.read()
+        checksum = hashlib.sha256(text.encode()).hexdigest()
+    else:
+        source = Path(path)
+        text = source.read_text(encoding="utf-8")
+        checksum = None
     fragments = _text_fragments(text)
     if not fragments:
         raise ValueError("text material must contain at least one non-empty paragraph")
-    return _build_notebook(source, question, "text", fragments, ("fragment_id", "text"), source_uri)
+    return _build_notebook(source, question, "text", fragments, ("fragment_id", "text"), source_uri or ("stdin://pasted-material" if str(path) == "-" else None), checksum=checksum)
 
 
 def import_table_material(path: str | Path, question: str, source_uri: str | None = None) -> MaterialImport:

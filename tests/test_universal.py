@@ -1,3 +1,4 @@
+import io
 import json
 
 from representation_compiler.notebook_explorer import render_notebook_explorer
@@ -16,6 +17,14 @@ def test_text_adapter_creates_structurally_different_representation_notebook(tmp
     assert notebook.representations["mechanism-map"].discards
     assert notebook.representations["mechanism-map"].falsification_test
     assert notebook.derived_data["source-items"].rows[0]["fragment_id"] == "fragment-1"
+
+
+def test_text_adapter_accepts_pasted_standard_input(monkeypatch):
+    monkeypatch.setattr("sys.stdin", io.StringIO("A source pasted directly into the terminal."))
+
+    notebook = import_text_material("-", "Understand pasted material").notebook
+
+    assert notebook.datasets["pasted-material"].uri == "stdin://pasted-material"
 
 
 def test_table_adapter_preserves_rows_and_learning_ledger(tmp_path):

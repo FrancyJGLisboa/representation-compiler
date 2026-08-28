@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import cos, radians, sin, sqrt
+from math import acos, cos, degrees, radians, sin, sqrt
 
 
 @dataclass(frozen=True)
@@ -28,3 +28,12 @@ def icrs_unit_vector(point: ICRSSkyPoint) -> tuple[float, float, float]:
 
 def norm(vector: tuple[float, float, float]) -> float:
     return sqrt(sum(component * component for component in vector))
+
+
+def angular_separation_deg(left: tuple[float, float, float], right: tuple[float, float, float]) -> float:
+    """Great-circle angular separation of two non-zero Cartesian vectors."""
+    left_norm, right_norm = norm(left), norm(right)
+    if not left_norm or not right_norm:
+        raise ValueError("angular separation requires non-zero vectors")
+    cosine = sum(a * b for a, b in zip(left, right)) / (left_norm * right_norm)
+    return degrees(acos(max(-1.0, min(1.0, cosine))))

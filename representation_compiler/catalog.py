@@ -11,6 +11,7 @@ from .notebook import CoordinateFrame, DatasetReference, DerivedData, Representa
 
 
 REQUIRED_COLUMNS = {"ra_deg", "dec_deg"}
+UNCERTAINTY_COLUMNS = {"uncertainty_deg", "ra_error_deg", "dec_error_deg"}
 
 
 @dataclass(frozen=True)
@@ -29,17 +30,22 @@ def import_icrs_catalog(path: str | Path, source_uri: str | None = None) -> Cata
         missing = REQUIRED_COLUMNS - headers
         if missing:
             raise ValueError(f"catalog requires degree-declared columns: {', '.join(sorted(missing))}")
-        vectors, derived_rows = [], []
+        vectors, derived_rows, has_uncertainty = [], [], False
         for row_number, row in enumerate(reader, start=2):
             try:
                 point = ICRSSkyPoint(float(row["ra_deg"]), float(row["dec_deg"]))
                 vector = icrs_unit_vector(point)
                 vectors.append(vector)
-                derived_rows.append({
+                derived = {
                     "id": row.get("id") or row.get("name") or f"row-{row_number - 1}",
                     "ra_deg": point.right_ascension_deg, "dec_deg": point.declination_deg,
                     "x": vector[0], "y": vector[1], "z": vector[2],
-                })
+                }
+                uncertainty = _uncertainty_deg(row)
+                if uncertainty is not None:
+                    derived["uncertainty_deg"] = uncertainty
+                    has_uncertainty = True
+                derived_rows.append(derived)
             except (TypeError, ValueError) as error:
                 raise ValueError(f"row {row_number}: invalid ICRS coordinates: {error}") from error
     if not vectors:
@@ -53,7 +59,7 @@ def import_icrs_catalog(path: str | Path, source_uri: str | None = None) -> Cata
         question="Which angular relationships in this catalog become easier to reason about in Cartesian coordinates?",
         datasets={dataset_id: DatasetReference(
             dataset_id, source.name, source_uri or f"file://{source.name}", "csv", f"sha256:{checksum}",
-            metadata={"row_count": str(len(vectors)), "ra_column": "ra_deg", "dec_column": "dec_deg", "angle_unit": "deg"},
+            metadata={"row_count": str(len(vectors)), "ra_column": "ra_deg", "dec_column": "dec_deg", "angle_unit": "deg", "uncertainty_columns": ",".join(sorted(headers & UNCERTAINTY_COLUMNS))},
         )},
         frames={"icrs-cartesian": CoordinateFrame("icrs-cartesian", "ICRS Cartesian unit sphere", ("x", "y", "z"), ("unit", "unit", "unit"), "J2000", "ICRS")},
         tests={"unit-norm": RepresentationTest(
@@ -70,7 +76,7 @@ def import_icrs_catalog(path: str | Path, source_uri: str | None = None) -> Cata
             ("select object", "rotate sky"), ("unit-norm",), "icrs-unit-vectors",
         )},
         derived_data={"icrs-unit-vectors": DerivedData(
-            "icrs-unit-vectors", "unit-sphere", ("id", "ra_deg", "dec_deg", "x", "y", "z"), tuple(derived_rows),
+            "icrs-unit-vectors", "unit-sphere", ("id", "ra_deg", "dec_deg", "x", "y", "z") + (("uncertainty_deg",) if has_uncertainty else ()), tuple(derived_rows),
         )},
     )
     notebook.validate()
@@ -79,3 +85,15 @@ def import_icrs_catalog(path: str | Path, source_uri: str | None = None) -> Cata
 
 def _slug(value: str) -> str:
     return "".join(character.lower() if character.isalnum() else "-" for character in value).strip("-")
+
+
+def _uncertainty_deg(row: dict[str, str]) -> float | None:
+    values = []
+    for column in ("uncertainty_deg", "ra_error_deg", "dec_error_deg"):
+        value = row.get(column, "").strip()
+        if value:
+            parsed = float(value)
+            if parsed < 0:
+                raise ValueError(f"{column} must be non-negative")
+            values.append(parsed)
+    return max(values) if values else None

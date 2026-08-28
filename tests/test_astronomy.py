@@ -1,6 +1,6 @@
 import pytest
 
-from representation_compiler.astronomy import ICRSSkyPoint, icrs_unit_vector, norm
+from representation_compiler.astronomy import ICRSSkyPoint, angular_separation_deg, icrs_unit_vector, norm
 
 
 def test_icrs_unit_vector_preserves_direction_as_unit_length():
@@ -12,3 +12,8 @@ def test_icrs_unit_vector_preserves_direction_as_unit_length():
 def test_icrs_point_rejects_invalid_coordinates():
     with pytest.raises(ValueError, match="right ascension"):
         icrs_unit_vector(ICRSSkyPoint(360, 0))
+
+
+def test_angular_separation_uses_the_3d_unit_vectors():
+    assert angular_separation_deg((1, 0, 0), (0, 1, 0)) == pytest.approx(90)
+    assert angular_separation_deg((1, 0, 0), (1, 0, 0)) == pytest.approx(0)

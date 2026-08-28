@@ -35,7 +35,7 @@ A chat can suggest a coordinate transformation. A notebook makes the transformat
 
 ## Import a CSV catalog now
 
-The importer requires the explicit degree columns `ra_deg` and `dec_deg`; it will not guess units from ambiguous `ra` and `dec` headers.
+The importer requires the explicit degree columns `ra_deg` and `dec_deg`; it will not guess units from ambiguous `ra` and `dec` headers. Optional degree-based uncertainty may be supplied as `uncertainty_deg`, or as `ra_error_deg` and `dec_error_deg`.
 
 ```bash
 python3 -m representation_compiler.cli \
@@ -53,7 +53,9 @@ python3 -m representation_compiler.cli \
   --explorer-output catalog.sky.html
 ```
 
-The JSON records the source checksum, row count, ICRS Cartesian frame, reversible mapping, named derived `x`, `y`, `z` vectors, what the representation preserves/discards, and a passed unit-norm test over every imported coordinate. The explorer lets a recipient rotate the unit sphere and inspect any selected object's original and derived coordinates.
+The JSON records the source checksum, row count, ICRS Cartesian frame, reversible mapping, named derived `x`, `y`, `z` vectors, optional uncertainty, what the representation preserves/discards, and a passed unit-norm test over every imported coordinate. The explorer lets a recipient rotate the unit sphere and inspect any selected object's original and derived coordinates.
+
+Click two objects to calculate their great-circle angular separation from their original 3D unit vectors. The visible connecting line is a guide only; it is not used for the calculation. If listed uncertainty exists, the explorer displays a halo and reports the quadrature-combined listed uncertainty for the selected pair.
 
 Render an explorer later from an existing notebook:
 

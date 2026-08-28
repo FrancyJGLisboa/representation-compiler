@@ -26,3 +26,14 @@ def test_catalog_rejects_missing_explicit_degree_columns(tmp_path):
 
     with pytest.raises(ValueError, match="degree-declared columns"):
         import_icrs_catalog(catalog)
+
+
+def test_catalog_carries_explicit_uncertainty_when_provided(tmp_path):
+    catalog = tmp_path / "uncertain.csv"
+    catalog.write_text("name,ra_deg,dec_deg,ra_error_deg,dec_error_deg\nM42,83.822,-5.391,0.002,0.003\n", encoding="utf-8")
+
+    payload = import_icrs_catalog(catalog).notebook.to_dict()
+    row = payload["derived_data"]["icrs-unit-vectors"]["rows"][0]
+
+    assert row["uncertainty_deg"] == pytest.approx(0.003)
+    assert "ra_error_deg" in payload["datasets"]["uncertain"]["metadata"]["uncertainty_columns"]

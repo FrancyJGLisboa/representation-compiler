@@ -9,9 +9,41 @@ python3 -m pytest
 python3 -m representation_compiler.cli "Where do teams disagree?" --csv output/disagreements.csv
 ```
 
-## Invoke from any agentic terminal
+## Use it with an existing AI subscription — no API key
 
-Install the project locally, then create a portable task packet:
+The canonical cross-runtime source is [skills/representation-compiler](skills/representation-compiler). It contains the method, not a model connection: the user's Claude, Codex, or Copilot subscription performs the reasoning.
+
+### Claude Code
+
+Install the `adapters/claude-code` plugin. It exposes the shared skill as:
+
+```text
+/representation-compiler
+```
+
+Then paste a transcript, URL, PDF, or notes and state what you want to understand.
+
+### GitHub Copilot CLI
+
+Install directly from GitHub:
+
+```bash
+copilot skill add https://github.com/FrancyJGLisboa/representation-compiler/tree/main/skills/representation-compiler
+```
+
+Then invoke it with `Use the /representation-compiler skill ...`. If Copilot is already open, run `/skills reload`.
+
+### Codex and ChatGPT
+
+The repository includes the skill-only OpenAI plugin bundle at [plugins/representation-compiler](plugins/representation-compiler). Install or import it wherever the Plugins UI is available; it requires no connected app and no API key. In ChatGPT, select the plugin with `@` or the **More** menu. In Codex, use **Sources → Use plugins**.
+
+### Any web AI chat
+
+Copy the ready-to-use prompt from [web/representation-compiler.md](web/representation-compiler.md). It works in ChatGPT, Claude, Gemini, and other chat products that accept pasted instructions.
+
+### Optional terminal task packet
+
+For a portable task packet when a runtime has no skill installer:
 
 ```bash
 python3 -m pip install -e .

@@ -1,6 +1,6 @@
 {
   "name": "representation-compiler",
-  "version": "0.1.0",
+  "version": "0.1.0+codex.20260828110935",
   "description": "Evidence-backed representation discovery for human understanding.",
   "author": {
     "name": "Francy Lisboa Charuto"

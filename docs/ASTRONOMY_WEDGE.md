@@ -33,6 +33,19 @@ A chat can suggest a coordinate transformation. A notebook makes the transformat
 3. They can compare it with another representation, such as a sky projection, phase space, light curve, or graph.
 4. They can fork the notebook, change an assumption, and publish their result.
 
+## Import a CSV catalog now
+
+The importer requires the explicit degree columns `ra_deg` and `dec_deg`; it will not guess units from ambiguous `ra` and `dec` headers.
+
+```bash
+python3 -m representation_compiler.cli \
+  --import-star-catalog catalog.csv \
+  --catalog-source-uri "https://archive.example.org/catalog.csv" \
+  --notebook-output catalog.notebook.json
+```
+
+The JSON records the source checksum, row count, ICRS Cartesian frame, reversible mapping, what the representation preserves/discards, and a passed unit-norm test over every imported coordinate.
+
 ## Next build slice
 
-Add a CSV catalog importer that requires declared columns and units, creates an ICRS coordinate-frame record, produces the unit-sphere representation, and writes a portable notebook JSON file. FITS support comes after this contract is proven with real catalogs.
+Add portable derived vector data and an interactive sky explorer. FITS support comes after this contract is proven with real catalogs.

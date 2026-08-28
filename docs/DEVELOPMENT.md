@@ -58,6 +58,18 @@ python3 -m representation_compiler.cli --explain SESSION_ID "My explanation in m
 
 The system records explanation quality, confidence, remaining gaps, and the recommended next representation.
 
+## Astronomy CSV notebook
+
+Create a shareable astronomy representation notebook from a CSV whose columns explicitly declare degrees as `ra_deg` and `dec_deg`:
+
+```bash
+python3 -m representation_compiler.cli \
+  --import-star-catalog catalog.csv \
+  --notebook-output catalog.notebook.json
+```
+
+Pass `--catalog-source-uri` when the catalog has a stable public source URL. The JSON stores provenance, a checksum, the coordinate transform, representation trade-offs, and the executable invariant result.
+
 ## Supported local sources
 
 `representation_compiler.connectors.local_file()` reads `.txt`, `.md`, `.csv`, `.json`, `.eml`, and selectable-text PDF files. Credentialed Slack, Notion, Google Drive, and Jira adapters obtain their tokens from environment variables; do not put credentials in source control.

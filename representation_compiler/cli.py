@@ -16,6 +16,7 @@ from .web import serve
 from .discovery import discover
 from .connectors import local_file
 from .learning import assess_explanation, make_challenge, start_candidates
+from .catalog import import_icrs_catalog
 
 
 def main() -> None:
@@ -36,10 +37,20 @@ def main() -> None:
     parser.add_argument("--familiarity", default="new", help="Learner familiarity: new, partial, or confident")
     parser.add_argument("--explain", nargs=2, metavar=("SESSION_ID", "ANSWER"), help="Submit an explain-back answer")
     parser.add_argument("--confidence", type=float, default=.5, help="Self-rated confidence from 0 to 1")
+    parser.add_argument("--import-star-catalog", type=Path, help="Import CSV with ra_deg and dec_deg columns into a portable astronomy notebook")
+    parser.add_argument("--notebook-output", type=Path, help="Destination JSON file for --import-star-catalog")
+    parser.add_argument("--catalog-source-uri", help="Stable URI to store in the portable catalog notebook")
     args = parser.parse_args()
     model = project_alpha()
     if args.serve:
         serve(str(args.database), args.port)
+        return
+    if args.import_star_catalog:
+        if not args.notebook_output:
+            parser.error("--import-star-catalog requires --notebook-output")
+        imported = import_icrs_catalog(args.import_star_catalog, args.catalog_source_uri)
+        output = imported.notebook.write_json(args.notebook_output)
+        print(f"Imported {imported.row_count} catalog rows\nMaximum unit-norm error: {imported.max_unit_norm_error:.3g}\nNotebook: {output}")
         return
     if args.ingest:
         source = local_file(args.ingest)

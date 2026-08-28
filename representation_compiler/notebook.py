@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+import json
+from pathlib import Path
 from typing import Any
 
 
@@ -13,6 +15,7 @@ class DatasetReference:
     format: str
     checksum: str = ""
     license: str = ""
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -88,3 +91,10 @@ class RepresentationNotebook:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+    def write_json(self, path: str | Path) -> Path:
+        self.validate()
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True), encoding="utf-8")
+        return target

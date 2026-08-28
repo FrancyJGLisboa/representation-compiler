@@ -44,6 +44,7 @@ class Representation:
     test_ids: tuple[str, ...] = ()
     derived_data_id: str = ""
     falsification_test: str = ""
+    graph_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,30 @@ class LearningRecord:
     recommended_representation_id: str = ""
 
 
+@dataclass(frozen=True)
+class EvidenceNode:
+    id: str
+    label: str
+    kind: str
+    evidence_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class EvidenceEdge:
+    source_id: str
+    target_id: str
+    relation: str
+    evidence_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class RepresentationGraph:
+    id: str
+    title: str
+    nodes: tuple[EvidenceNode, ...]
+    edges: tuple[EvidenceEdge, ...]
+
+
 @dataclass
 class RepresentationNotebook:
     """The shareable object; diagrams and chat transcripts are projections of it."""
@@ -89,6 +114,7 @@ class RepresentationNotebook:
     representations: dict[str, Representation] = field(default_factory=dict)
     derived_data: dict[str, DerivedData] = field(default_factory=dict)
     tests: dict[str, RepresentationTest] = field(default_factory=dict)
+    graphs: dict[str, RepresentationGraph] = field(default_factory=dict)
     claims: tuple[str, ...] = ()
     learning_ledger: tuple[LearningRecord, ...] = ()
     version: str = "0.1"
@@ -120,6 +146,8 @@ class RepresentationNotebook:
                     raise ValueError(f"{representation.id}: unknown derived data")
                 if derived.representation_id != representation.id:
                     raise ValueError(f"{representation.id}: derived data belongs to another representation")
+            if representation.graph_id and representation.graph_id not in self.graphs:
+                raise ValueError(f"{representation.id}: unknown graph")
         for derived in self.derived_data.values():
             if derived.representation_id not in self.representations:
                 raise ValueError(f"{derived.id}: unknown representation")
@@ -130,6 +158,12 @@ class RepresentationNotebook:
                 raise ValueError("learning records require a goal and known representation")
             if record.recommended_representation_id and record.recommended_representation_id not in self.representations:
                 raise ValueError("learning record references an unknown recommendation")
+        for graph in self.graphs.values():
+            node_ids = {node.id for node in graph.nodes}
+            if not graph.nodes or any(not node.evidence_ids for node in graph.nodes):
+                raise ValueError(f"{graph.id}: nodes require source evidence")
+            if any(edge.source_id not in node_ids or edge.target_id not in node_ids or not edge.evidence_ids for edge in graph.edges):
+                raise ValueError(f"{graph.id}: edges require known endpoints and source evidence")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -21,6 +21,7 @@ from .sky_explorer import write_sky_explorer
 from .fits_catalog import import_icrs_fits_catalog
 from .universal import import_codebase_material, import_table_material, import_text_material
 from .notebook_explorer import write_notebook_explorer
+from .source_graph import enrich_notebook_payload
 
 
 def main() -> None:
@@ -56,6 +57,7 @@ def main() -> None:
     parser.add_argument("--import-codebase", type=Path, help="Import a source directory into an architecture understanding notebook")
     parser.add_argument("--material-question", help="What the learner wants to understand for a generic material import")
     parser.add_argument("--notebook-explorer", type=Path, help="Notebook JSON to render as a generic interactive understanding explorer")
+    parser.add_argument("--enrich-notebook", type=Path, help="Add source-grounded graph data to an existing understanding notebook")
     args = parser.parse_args()
     model = project_alpha()
     if args.serve:
@@ -106,6 +108,16 @@ def main() -> None:
         notebook = json.loads(args.notebook_explorer.read_text(encoding="utf-8"))
         output = write_notebook_explorer(notebook, args.explorer_output)
         print(f"Explorer: {output}")
+        return
+    if args.enrich_notebook:
+        if not args.notebook_output:
+            parser.error("--enrich-notebook requires --notebook-output")
+        notebook = enrich_notebook_payload(json.loads(args.enrich_notebook.read_text(encoding="utf-8")))
+        output = args.notebook_output
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(notebook, indent=2, sort_keys=True), encoding="utf-8")
+        explorer = write_notebook_explorer(notebook, args.explorer_output) if args.explorer_output else None
+        print(f"Notebook: {output}" + (f"\nExplorer: {explorer}" if explorer else ""))
         return
     if args.ingest:
         source = local_file(args.ingest)

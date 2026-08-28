@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .catalog import _slug
 from .notebook import CoordinateFrame, DatasetReference, DerivedData, LearningRecord, Representation, RepresentationNotebook, RepresentationTest
+from .source_graph import extract_source_graph
 
 
 @dataclass(frozen=True)
@@ -82,10 +83,11 @@ def _build_notebook(source: Path, question: str, material_type: str, rows: tuple
     checksum = checksum or hashlib.sha256(source.read_bytes()).hexdigest()
     frame_id = f"{material_type}-source"
     index_id = "source-index"
+    graph = extract_source_graph(rows, f"{source.stem}: source concept graph")
     dataset = DatasetReference(dataset_id, source.name, source_uri or f"file://{source}", material_type, f"sha256:{checksum}", {"item_count": str(len(rows)), "adapter": material_type, "columns": ",".join(columns)})
     representations = {index_id: Representation(index_id, "Source index", "source index", (dataset_id,), frame_id, "source material → addressable fragments or records", "addressable fragment or record → source material", ("source provenance", "verbatim fragments"), ("interpretation",), ("audit a representation against its material",), (), ("source-coverage",), "source-items")}
     for identifier, title, family, mapping, preserves, discards, easier, falsification in _CANDIDATES:
-        representations[identifier] = Representation(identifier, title, family, (dataset_id,), frame_id, mapping, "Use source identifiers to return to the original material.", (preserves, "source traceability"), (discards,), (easier,), ("this clicked", "too abstract", "another way", "go deeper"), ("source-coverage",), "", falsification)
+        representations[identifier] = Representation(identifier, title, family, (dataset_id,), frame_id, mapping, "Use source identifiers to return to the original material.", (preserves, "source traceability"), (discards,), (easier,), ("this clicked", "too abstract", "another way", "go deeper"), ("source-coverage",), "", falsification, graph.id)
     notebook = RepresentationNotebook(
         id=f"{dataset_id}-understanding",
         title=f"{source.stem}: understanding notebook",
@@ -95,6 +97,7 @@ def _build_notebook(source: Path, question: str, material_type: str, rows: tuple
         representations=representations,
         derived_data={"source-items": DerivedData("source-items", index_id, columns, rows)},
         tests={"source-coverage": RepresentationTest("source-coverage", "Every source item has a portable address", "Count derived rows and compare with adapter output", "passed", f"{len(rows)} items indexed")},
+        graphs={graph.id: graph},
     )
     notebook.validate()
     return MaterialImport(notebook, len(rows))

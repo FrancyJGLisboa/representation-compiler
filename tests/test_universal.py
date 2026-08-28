@@ -48,6 +48,8 @@ def test_code_adapter_indexes_imports_and_generic_explorer_exports_notebook(tmp_
     html = render_notebook_explorer(notebook.to_dict())
 
     assert notebook.derived_data["source-items"].rows[0]["imports"] == "json, pathlib"
-    assert "This clicked" in html
+    assert "Show this representation" in html
+    assert notebook.graphs["source-concept-graph"].nodes
+    assert all(node.evidence_ids for node in notebook.graphs["source-concept-graph"].nodes)
     assert "learning_ledger" in html
     assert json.loads(json.dumps(notebook.to_dict()))["datasets"]["code"]["format"] == "codebase"

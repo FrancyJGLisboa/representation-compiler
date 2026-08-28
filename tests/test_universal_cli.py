@@ -13,4 +13,4 @@ def test_cli_imports_text_and_writes_explorer(tmp_path, monkeypatch):
     cli.main()
 
     assert json.loads(output.read_text())["question"] == "Understand these notes"
-    assert "This clicked" in explorer.read_text()
+    assert "Show this representation" in explorer.read_text()

@@ -17,6 +17,7 @@ from .discovery import discover
 from .connectors import local_file
 from .learning import assess_explanation, make_challenge, start_candidates
 from .catalog import import_icrs_catalog
+from .sky_explorer import write_sky_explorer
 
 
 def main() -> None:
@@ -40,6 +41,8 @@ def main() -> None:
     parser.add_argument("--import-star-catalog", type=Path, help="Import CSV with ra_deg and dec_deg columns into a portable astronomy notebook")
     parser.add_argument("--notebook-output", type=Path, help="Destination JSON file for --import-star-catalog")
     parser.add_argument("--catalog-source-uri", help="Stable URI to store in the portable catalog notebook")
+    parser.add_argument("--sky-explorer", type=Path, help="Notebook JSON containing derived vectors to render as an interactive sky explorer")
+    parser.add_argument("--explorer-output", type=Path, help="Destination HTML file for an interactive sky explorer")
     args = parser.parse_args()
     model = project_alpha()
     if args.serve:
@@ -50,7 +53,15 @@ def main() -> None:
             parser.error("--import-star-catalog requires --notebook-output")
         imported = import_icrs_catalog(args.import_star_catalog, args.catalog_source_uri)
         output = imported.notebook.write_json(args.notebook_output)
-        print(f"Imported {imported.row_count} catalog rows\nMaximum unit-norm error: {imported.max_unit_norm_error:.3g}\nNotebook: {output}")
+        explorer = write_sky_explorer(imported.notebook.to_dict(), args.explorer_output) if args.explorer_output else None
+        print(f"Imported {imported.row_count} catalog rows\nMaximum unit-norm error: {imported.max_unit_norm_error:.3g}\nNotebook: {output}" + (f"\nExplorer: {explorer}" if explorer else ""))
+        return
+    if args.sky_explorer:
+        if not args.explorer_output:
+            parser.error("--sky-explorer requires --explorer-output")
+        notebook = json.loads(args.sky_explorer.read_text(encoding="utf-8"))
+        output = write_sky_explorer(notebook, args.explorer_output)
+        print(f"Explorer: {output}")
         return
     if args.ingest:
         source = local_file(args.ingest)

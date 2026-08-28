@@ -44,8 +44,25 @@ python3 -m representation_compiler.cli \
   --notebook-output catalog.notebook.json
 ```
 
-The JSON records the source checksum, row count, ICRS Cartesian frame, reversible mapping, what the representation preserves/discards, and a passed unit-norm test over every imported coordinate.
+Add `--explorer-output` to produce a self-contained interactive HTML explorer at the same time:
+
+```bash
+python3 -m representation_compiler.cli \
+  --import-star-catalog catalog.csv \
+  --notebook-output catalog.notebook.json \
+  --explorer-output catalog.sky.html
+```
+
+The JSON records the source checksum, row count, ICRS Cartesian frame, reversible mapping, named derived `x`, `y`, `z` vectors, what the representation preserves/discards, and a passed unit-norm test over every imported coordinate. The explorer lets a recipient rotate the unit sphere and inspect any selected object's original and derived coordinates.
+
+Render an explorer later from an existing notebook:
+
+```bash
+python3 -m representation_compiler.cli \
+  --sky-explorer catalog.notebook.json \
+  --explorer-output catalog.sky.html
+```
 
 ## Next build slice
 
-Add portable derived vector data and an interactive sky explorer. FITS support comes after this contract is proven with real catalogs.
+Add FITS support and a richer explorer with angular-separation measurement and uncertainty overlays after this contract is proven with real catalogs.

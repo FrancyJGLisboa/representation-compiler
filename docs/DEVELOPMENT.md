@@ -65,10 +65,11 @@ Create a shareable astronomy representation notebook from a CSV whose columns ex
 ```bash
 python3 -m representation_compiler.cli \
   --import-star-catalog catalog.csv \
-  --notebook-output catalog.notebook.json
+  --notebook-output catalog.notebook.json \
+  --explorer-output catalog.sky.html
 ```
 
-Pass `--catalog-source-uri` when the catalog has a stable public source URL. The JSON stores provenance, a checksum, the coordinate transform, representation trade-offs, and the executable invariant result.
+Pass `--catalog-source-uri` when the catalog has a stable public source URL. The JSON stores provenance, a checksum, named derived Cartesian vectors, the coordinate transform, representation trade-offs, and the executable invariant result. `catalog.sky.html` is a self-contained explorer that can be shared alongside the JSON.
 
 ## Supported local sources
 

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .astronomy import ICRSSkyPoint, icrs_unit_vector, norm
-from .notebook import CoordinateFrame, DatasetReference, Representation, RepresentationNotebook, RepresentationTest
+from .notebook import CoordinateFrame, DatasetReference, DerivedData, Representation, RepresentationNotebook, RepresentationTest
 
 
 REQUIRED_COLUMNS = {"ra_deg", "dec_deg"}
@@ -29,11 +29,17 @@ def import_icrs_catalog(path: str | Path, source_uri: str | None = None) -> Cata
         missing = REQUIRED_COLUMNS - headers
         if missing:
             raise ValueError(f"catalog requires degree-declared columns: {', '.join(sorted(missing))}")
-        vectors = []
+        vectors, derived_rows = [], []
         for row_number, row in enumerate(reader, start=2):
             try:
                 point = ICRSSkyPoint(float(row["ra_deg"]), float(row["dec_deg"]))
-                vectors.append(icrs_unit_vector(point))
+                vector = icrs_unit_vector(point)
+                vectors.append(vector)
+                derived_rows.append({
+                    "id": row.get("id") or row.get("name") or f"row-{row_number - 1}",
+                    "ra_deg": point.right_ascension_deg, "dec_deg": point.declination_deg,
+                    "x": vector[0], "y": vector[1], "z": vector[2],
+                })
             except (TypeError, ValueError) as error:
                 raise ValueError(f"row {row_number}: invalid ICRS coordinates: {error}") from error
     if not vectors:
@@ -61,7 +67,10 @@ def import_icrs_catalog(path: str | Path, source_uri: str | None = None) -> Cata
             ("angular direction", "great-circle geometry", "rotation-invariant angular comparison"),
             ("radial distance", "brightness", "catalog row order"),
             ("angular separation", "vector-based sky rotations", "spatial indexing"),
-            ("select object", "rotate sky"), ("unit-norm",),
+            ("select object", "rotate sky"), ("unit-norm",), "icrs-unit-vectors",
+        )},
+        derived_data={"icrs-unit-vectors": DerivedData(
+            "icrs-unit-vectors", "unit-sphere", ("id", "ra_deg", "dec_deg", "x", "y", "z"), tuple(derived_rows),
         )},
     )
     notebook.validate()

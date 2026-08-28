@@ -42,6 +42,15 @@ class Representation:
     makes_easier: tuple[str, ...]
     controls: tuple[str, ...] = ()
     test_ids: tuple[str, ...] = ()
+    derived_data_id: str = ""
+
+
+@dataclass(frozen=True)
+class DerivedData:
+    id: str
+    representation_id: str
+    columns: tuple[str, ...]
+    rows: tuple[dict[str, Any], ...]
 
 
 @dataclass(frozen=True)
@@ -63,6 +72,7 @@ class RepresentationNotebook:
     datasets: dict[str, DatasetReference] = field(default_factory=dict)
     frames: dict[str, CoordinateFrame] = field(default_factory=dict)
     representations: dict[str, Representation] = field(default_factory=dict)
+    derived_data: dict[str, DerivedData] = field(default_factory=dict)
     tests: dict[str, RepresentationTest] = field(default_factory=dict)
     claims: tuple[str, ...] = ()
     version: str = "0.1"
@@ -88,6 +98,17 @@ class RepresentationNotebook:
             for test_id in representation.test_ids:
                 if test_id not in self.tests:
                     raise ValueError(f"{representation.id}: unknown test {test_id}")
+            if representation.derived_data_id:
+                derived = self.derived_data.get(representation.derived_data_id)
+                if not derived:
+                    raise ValueError(f"{representation.id}: unknown derived data")
+                if derived.representation_id != representation.id:
+                    raise ValueError(f"{representation.id}: derived data belongs to another representation")
+        for derived in self.derived_data.values():
+            if derived.representation_id not in self.representations:
+                raise ValueError(f"{derived.id}: unknown representation")
+            if not derived.columns or not derived.rows:
+                raise ValueError(f"{derived.id}: columns and rows are required")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

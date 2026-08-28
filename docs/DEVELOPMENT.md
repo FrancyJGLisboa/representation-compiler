@@ -80,7 +80,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e '.[astronomy]'
 ```
 
-Then import an ICRS binary table whose selected coordinate columns declare units convertible to degrees:
+Then import a FITS binary table whose selected coordinate columns declare units convertible to degrees:
 
 ```bash
 .venv/bin/python -m representation_compiler.cli \
@@ -90,7 +90,7 @@ Then import an ICRS binary table whose selected coordinate columns declare units
   --notebook-output catalog.notebook.json
 ```
 
-The importer records FITS `RADESYS`, `EQUINOX`, HDU, column units, checksum, and source URI. It currently accepts ICRS only; it rejects an unspecified or different coordinate frame rather than guessing a conversion.
+The importer accepts `ICRS`, `FK5`, `FK4`, and `GALACTIC` via `RADESYS` or `--fits-frame`. It transforms every supported input into ICRS before deriving Cartesian unit vectors, then records the source frame/equinox and ICRS output frame. For Galactic catalogs, pass the longitude and latitude columns through `--fits-ra-column` and `--fits-dec-column` (for example, `L` and `B`). Unsupported or unspecified frames are rejected rather than guessed.
 
 ## Supported local sources
 

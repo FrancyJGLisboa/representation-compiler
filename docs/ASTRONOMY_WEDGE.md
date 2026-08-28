@@ -73,7 +73,7 @@ Install the optional astronomy dependency once:
 python3 -m pip install -e '.[astronomy]'
 ```
 
-FITS import requires the exact RA/Dec column names. Those columns must carry units Astropy can convert to degrees. The binary-table header must declare `RADESYS = ICRS`, or you must state `--fits-frame ICRS`; other frames are rejected until a coordinate transformation is implemented.
+FITS import requires the exact coordinate-column names. Those columns must carry units Astropy can convert to degrees. The binary-table header must declare `RADESYS`, or you must state `--fits-frame`. `ICRS`, `FK5`, `FK4`, and `GALACTIC` are supported explicitly; each is transformed to ICRS before Cartesian vectors are derived. For Galactic input, pass `L` as `--fits-ra-column` and `B` as `--fits-dec-column`. Unsupported or missing frames are rejected rather than guessed.
 
 ```bash
 python3 -m representation_compiler.cli \
@@ -85,8 +85,8 @@ python3 -m representation_compiler.cli \
   --explorer-output catalog.sky.html
 ```
 
-The notebook records the FITS checksum, HDU, original column names and units, `RADESYS`, `EQUINOX`, coordinate frame, derived vectors, and invariant result.
+The notebook records the FITS checksum, HDU, original column names and units, input `RADESYS`/`EQUINOX`, ICRS output frame, derived vectors, and invariant result.
 
 ## Next build slice
 
-Add non-ICRS frame transformations and FITS uncertainty-column mappings after this contract is proven with real catalogs.
+Add FITS uncertainty-column mappings and additional coordinate frames after this contract is proven with real catalogs.

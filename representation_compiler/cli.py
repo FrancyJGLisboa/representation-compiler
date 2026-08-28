@@ -45,10 +45,10 @@ def main() -> None:
     parser.add_argument("--sky-explorer", type=Path, help="Notebook JSON containing derived vectors to render as an interactive sky explorer")
     parser.add_argument("--explorer-output", type=Path, help="Destination HTML file for an interactive sky explorer")
     parser.add_argument("--import-fits-catalog", type=Path, help="Import an ICRS FITS binary table into a portable astronomy notebook")
-    parser.add_argument("--fits-ra-column", help="Explicit FITS right-ascension column with a degree-convertible unit")
-    parser.add_argument("--fits-dec-column", help="Explicit FITS declination column with a degree-convertible unit")
+    parser.add_argument("--fits-ra-column", help="Explicit FITS longitude/RA column with a degree-convertible unit")
+    parser.add_argument("--fits-dec-column", help="Explicit FITS latitude/Dec column with a degree-convertible unit")
     parser.add_argument("--fits-hdu", type=int, default=1, help="FITS binary-table HDU index")
-    parser.add_argument("--fits-frame", help="Explicit coordinate frame when RADESYS is absent; currently ICRS only")
+    parser.add_argument("--fits-frame", help="Explicit coordinate frame when RADESYS is absent: ICRS, FK5, FK4, or GALACTIC")
     args = parser.parse_args()
     model = project_alpha()
     if args.serve:

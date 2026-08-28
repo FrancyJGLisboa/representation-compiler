@@ -17,9 +17,16 @@ Optimize for **understanding utility**:
 
 Decision support, project tracking, teaching, research, and team alignment are downstream applications of understanding—not separate product cores.
 
+## First serious wedge: astronomy representation notebooks
+
+The first domain-specific product is an astronomy representation notebook: a shareable object that records a dataset, coordinate frames, mappings between representations, preserved/discarded information, scientific claims, interactive controls, and executable tests.
+
+An astronomer should be able to publish a representation that another person can inspect, change, test, fork, and cite—not merely a diagram or a chat transcript. The first executable invariant is an ICRS right-ascension/declination to Cartesian unit-vector transformation; later slices add FITS/table ingestion, units, uncertainty propagation, coordinate-frame transforms, and interactive views.
+
 ## Invariants
 
 - The system searches structurally different representations before selecting one.
 - A visual is a projection of evidence-backed reality, not the record of truth.
 - A person can say which representation clicked and why.
 - Candidate representations include what they preserve, discard, and a falsification test.
+- A published scientific representation records its data provenance, coordinate frame, mapping, assumptions, and executable checks.
